@@ -80,48 +80,33 @@ module.exports.getAccessToken = async (event) => {
     });
  };
 
+
  module.exports.getCalendarEvents = async (event) => {
-  return new Promise((resolve, reject) => {
-    const accessToken = event.headers?.Authorization || event.headers?.authorization;
+  const access_token = decodeURIComponent(`${event.pathParameters.access_token}`);
+  oAuth2Client.setCredentials({ access_token });
 
-    if (!accessToken) {
-      return reject({
-        statusCode: 401,
-        body: JSON.stringify({ message: "Unauthorized: No access token provided" }),
-      });
-    }
+  try {
+    const response = await calendar.events.list({
+      calendarId: 'fullstackwebdev@careerfoundry.com',  // Add your Calendar ID here
+      auth: oAuth2Client,
+      timeMin: new Date().toISOString(),  // Start from the current date
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
 
-    oAuth2Client.setCredentials({ access_token: accessToken });
-
-
-    
-    calendar.events.list(
-      {
-        calendarId: CALENDAR_ID,
-        auth: oAuth2Client,
-        timeMin: new Date().toISOString(),
-        singleEvents: true,
-        orderBy: "startTime",
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
-      (error, response) => {
-        if (error) {
-          return reject({
-            statusCode: 500,
-            body: JSON.stringify({ message: "Failed to fetch calendar events", error: error.message }),
-          });
-        }
-
-        return resolve({
-          statusCode: 200,
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Credentials': true,
-          },
-          body: JSON.stringify(response.data.items),
-        });
-      }
-    );
-  })
-    .then((result) => result)
-    .catch((error) => error);
+      body: JSON.stringify({ events: response.data.items }),
+    };
+  } catch (error) {
+    console.error('Error fetching calendar events:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: error.message }),
+    };
+  }
 };
