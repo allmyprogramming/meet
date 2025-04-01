@@ -14,18 +14,18 @@ functions:
  getAuthURL:
    handler: handler.getAuthURL
    events:
-     - http:
+     - https://55pg33s3db.execute-api.eu-central-1.amazonaws.com/dev/api/get-auth-url
          path: api/get-auth-url
          method: get
  getAccessToken:
    handler: handler.getAccessToken
    events:
-     - http:
+     - http: https://55pg33s3db.execute-api.eu-central-1.amazonaws.com/dev/api/token/{code}
          path: api/token/{code}
          method: get
  getCalendarEvents:
     handler: handler.getCalendarEvents
     events:
-      - http:
+      - http:https://55pg33s3db.execute-api.eu-central-1.amazonaws.com/dev/api/get-events/{access_token}
           path: api/get-events/{access_token}
           method: get
