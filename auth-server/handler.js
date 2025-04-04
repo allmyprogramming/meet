@@ -3,7 +3,7 @@
 
 const { google } = require("googleapis");
 const calendar = google.calendar("v3");
-const SCOPES = ["https://www.googleapis.com/auth/calendar.events.public.readonly"];
+const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 const { CLIENT_SECRET, CLIENT_ID, CALENDAR_ID } = process.env;
 const redirect_uris = [
  "https://meet-delta-three.vercel.app"
@@ -33,6 +33,8 @@ module.exports.getAuthURL = async () => {
    statusCode: 200,
    headers: {
      'Access-Control-Allow-Origin': '*',
+     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+     'Access-Control-Allow-Headers': 'Content-Type',
      'Access-Control-Allow-Credentials': true,
    },
    body: JSON.stringify({
