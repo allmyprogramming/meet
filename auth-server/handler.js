@@ -6,54 +6,55 @@ const calendar = google.calendar("v3");
 const SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"];
 const { CLIENT_SECRET, CLIENT_ID, CALENDAR_ID } = process.env;
 const redirect_uris = [
- "https://meet-delta-three.vercel.app"
+  "https://meet-delta-three.vercel.app"
 ];
 
 
 const oAuth2Client = new google.auth.OAuth2(
- CLIENT_ID,
- CLIENT_SECRET,
- redirect_uris[0]
+  CLIENT_ID,
+  CLIENT_SECRET,
+  redirect_uris[0]
 );
 
 
 module.exports.getAuthURL = async () => {
- /**
-  *
-  * Scopes array is passed to the `scope` option.
-  *
-  */
- const authUrl = oAuth2Client.generateAuthUrl({
-   access_type: "offline",
-   scope: SCOPES,
- });
+  /**
+   *
+   * Scopes array is passed to the `scope` option.
+   *
+   */
+  const authUrl = oAuth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: SCOPES,
+  });
 
 
- return {statusCode: 200,
-   headers: {
-     'Access-Control-Allow-Origin': 'http://127.0.0.1:5500',
-     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-     'Access-Control-Allow-Headers': 'Content-Type',
-     'Access-Control-Allow-Credentials': 'true',
-   },
-   body: JSON.stringify({
-     authUrl,
-   }),
- };
+  return {
+    statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Origin': 'http://127.0.0.1:5500',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Credentials': 'true',
+    },
+    body: JSON.stringify({
+      authUrl,
+    }),
+  };
 };
 
 module.exports.getAccessToken = async (event) => {
   // Decode authorization code extracted from the URL query
   const code = decodeURIComponent(`${event.pathParameters.code}`);
- 
- 
+
+
   return new Promise((resolve, reject) => {
     /**
      *  Exchange authorization code for access token with a “callback” after the exchange,
      *  The callback in this case is an arrow function with the results as parameters: “error” and “response”
      */
- 
- 
+
+
     oAuth2Client.getToken(code, (error, response) => {
       if (error) {
         return reject(error);
@@ -79,15 +80,15 @@ module.exports.getAccessToken = async (event) => {
         body: JSON.stringify(error),
       };
     });
- };
+};
 
 
- module.exports.getCalendarEvents = async (event) => {
+module.exports.getCalendarEvents = async (event) => {
   // Decode authorization code extracted from the URL query
   const access_token = decodeURIComponent(`${event.pathParameters.access_token}`);
- 
+
   oAuth2Client.setCredentials({ access_token });
- 
+
   return new Promise((resolve, reject) => {
     calendar.events.list(
       {
@@ -113,7 +114,7 @@ module.exports.getAccessToken = async (event) => {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Credentials': true,
         },
-        body: JSON.stringify({events: results.data.items}),
+        body: JSON.stringify({ events: results.data.items }),
       };
     })
     .catch((error) => {
